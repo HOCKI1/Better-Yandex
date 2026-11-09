@@ -1,22 +1,35 @@
 // ==UserScript==
 // @name         Better Yandex
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.1.1
 // @description  Вырезает промо и рекламу в сервисах Яндекса
 // @author       Hockii x Gemini
 // @match        https://ya.ru/*
+// @match        https://m.ya.ru/*
 // @match        https://yandex.ru/*
+// @match        https://m.yandex.ru/*
 // @match        https://yandex.kz/*
+// @match        https://m.yandex.kz/*
 // @match        https://yandex.by/*
+// @match        https://m.yandex.by/*
 // @match        https://yandex.com/*
+// @match        https://m.yandex.com/*
 // @match        https://mail.yandex.ru/*
+// @match        https://touch.mail.yandex.ru/*
 // @match        https://mail.yandex.kz/*
+// @match        https://touch.mail.yandex.kz/*
 // @match        https://mail.yandex.by/*
+// @match        https://touch.mail.yandex.by/*
 // @match        https://mail.yandex.com/*
+// @match        https://touch.mail.yandex.com/*
 // @match        https://disk.yandex.ru/*
+// @match        https://touch.disk.yandex.ru/*
 // @match        https://disk.yandex.kz/*
+// @match        https://touch.disk.yandex.kz/*
 // @match        https://disk.yandex.by/*
+// @match        https://touch.disk.yandex.by/*
 // @match        https://disk.yandex.com/*
+// @match        https://touch.disk.yandex.com/*
 // @match        https://market.yandex.ru/*
 // @match        https://market.yandex.kz/*
 // @match        https://market.yandex.by/*
@@ -84,20 +97,32 @@
         // Блоки монетизации
         'div[class*="MonetizationItemContainer"]',
 
-        // Сервисные разделители писем
+        // Сервисные кнопки в боковой панели (скрываем чужие сервисы, сохраняя активный)
         'div[data-key][data-servicewrap]:not(:has([data-testid*="current"]))',
         'div[class*="ServiceWrapBlock"][data-key]:not(:has([data-testid*="current"]))',
         'div:has(> span > [data-testid="orb-global-bar-service-button"])',
-        'div[data-key][data-servicewrap]',
 
         // Промо-карусели в левом меню
         '[data-testid="aside_promo_carousel_banner"]',
         '.promozavr-anchor-carousel-banner',
 
         // Кнопка «Установить приложение» в сайдбаре Яндекс Диска
-        'div.AppLink',
         'div:has(> a[href*="disk/download"])',
         'a[href*="disk/download?src=Yandex.Sidebar"]',
+
+        // Мобильный попап «Почта лучше в приложении» (скрываем строго сам корень модалки)
+        'div[class*="PopupAggressivePromoApps"]',
+        'div[class*="Modal"]:has([class*="PopupAggressivePromoApps"])',
+
+        // Промо приложения в сайдбаре мобильной почты
+        'a.sidebarPromo',
+        'a[class*="sidebarPromo"]',
+        'a[href*="source=sidebartouch"]',
+
+        // Плавающая кнопка «Открыть в приложении» (FAB) в мобильной почте
+        'div[class*="FloatingButton-m__container"]',
+        'a[class*="FloatingButton-m__fabLink"]',
+        'div:has(> a[href*="source=mailtouchfloatapp"])',
 
         // ==========================================
         // ЯНДЕКС ПОИСК
@@ -191,7 +216,24 @@
         'div[style*="grid-row"]:has([data-baobab-name="recomMadv"])',
         'div[style*="grid-row"]:has([data-apiary-widget-name="@monetize/MediaContent"])',
         'div[style*="grid-row"]:has([data-zone-data*="advertisementId"])',
-        'div[data-zone-name="recomMadv"]'
+        'div[data-zone-name="recomMadv"]',
+
+        // Всплывающий FOMO-виджет со скидками и таймером в Маркете
+        'div[data-zone-name="fomoPopup"]',
+        'div[data-baobab-name="fomoPopup"]',
+        'div:has(> a[href*="/page/wow_sale"])',
+
+        // Всплывающая снизу шторка (Drawer) «В приложении — выгодно» в мобильном Маркете
+        'div[id*="/template/drawer"]:has([data-zone-name="appDistributionPopup"])',
+        'div[id*="/template/drawer"]:has([data-apiary-widget-name*="AppDistributionContent"])',
+        'div[data-apiary-widget-name="@light/Drawer"]:has([data-zone-name="appDistributionPopup"])',
+        'div[data-zone-name="appDistributionPopup"]',
+
+        // Промо-блок со сторами и QR-кодом в десктопном футере Маркета
+        'div[id*="/footer/appPromoLoader"]',
+        'div[data-apiary-widget-name*="DistributionFooterDesktop"]',
+        'div:has(> div > [data-auto="qrCodePicture"])',
+
     ];
 
     const style = document.createElement('style');
@@ -212,11 +254,20 @@
             overflow: hidden !important;
         }
 
-        /* Разблокировка скролла, если модалка успела заблокировать body/html */
+        /* Разблокировка скролла, если модалка заблокировала body/html */
         html:has(.DistributionSplashScreenModal),
         body:has(.DistributionSplashScreenModal),
         html:has([class*="DistributionSplashScreenModal"]),
-        body:has([class*="DistributionSplashScreenModal"]) {
+        body:has([class*="DistributionSplashScreenModal"]),
+        html:has([class*="PopupAggressivePromoApps"]),
+        body:has([class*="PopupAggressivePromoApps"]) {
+            overflow: auto !important;
+            position: static !important;
+        }
+
+        /* Разблокировка скролла при вызове промо-дровера Маркета */
+        html:has([data-zone-name="appDistributionPopup"]),
+        body:has([data-zone-name="appDistributionPopup"]) {
             overflow: auto !important;
             position: static !important;
         }
