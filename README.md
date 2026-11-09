@@ -7,6 +7,6 @@
 1. Установите расширение [Tampermonkey](https://www.tampermonkey.net/) для своего браузера.
 2. Нажмите на кнопку ниже:
 
-[![Установить скрипт](https://img.shields.io/badge/Tampermonkey-Установить%20скрипт-green?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/ТВОЙ_НИК/ТВОЙ_РЕПОЗИТОРИЙ/main/remove-ya-trash.user.js)
+[![Установить скрипт](https://img.shields.io/badge/Tampermonkey-Установить%20скрипт-green?style=for-the-badge&logo=tampermonkey)](https://raw.githubusercontent.com/HOCKI1/Better-Yandex/main/Better-Yandex.user.js)
 
 *(Или откройте [прямую ссылку на raw-файл](https://raw.githubusercontent.com/ТВОЙ_НИК/ТВОЙ_РЕПОЗИТОРИЙ/main/remove-ya-trash.user.js) — расширение увидит его автоматически).*
