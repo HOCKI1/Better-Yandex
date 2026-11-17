@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better Yandex
 // @namespace    http://tampermonkey.net/
-// @version      1.1.1
+// @version      1.1.2
 // @description  Вырезает промо и рекламу в сервисах Яндекса
 // @author       Hockii x Gemini
 // @match        https://ya.ru/*
@@ -132,6 +132,11 @@
         'li:has(a[href*="/search/_sttc/"])',
         'li:has([data-wylac*=\'"type":"adv"\'])',
         'li:has([data-wylac*="about-advertiser"])',
+
+        // Карусель рекламы под поиском
+        'div.main__carousel',
+        'div[data-bem*="main__carousel"]',
+        'div.main__carousel[data-bem*="collectionId"]',
 
         // ==========================================
         // ЯНДЕКС КАРТИНКИ
