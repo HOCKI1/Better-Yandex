@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Better Yandex
 // @namespace    http://tampermonkey.net/
-// @version      1.1.3
-// @description  Вырезает промо и рекламу в сервисах Яндекса
+// @version      1.2.0
+// @description  Вырезает промо и рекламу в сервисах Яндекса, заменяет переведённые Турбо-страницы в поиске на оригинальные ссылки
 // @author       Hockii x Gemini
 // @match        https://ya.ru/*
 // @match        https://m.ya.ru/*
@@ -242,8 +242,7 @@
         // Промо-блок со сторами и QR-кодом в десктопном футере Маркета
         'div[id*="/footer/appPromoLoader"]',
         'div[data-apiary-widget-name*="DistributionFooterDesktop"]',
-        'div:has(> div > [data-auto="qrCodePicture"])',
-
+        'div:has(> div > [data-auto="qrCodePicture"])'
     ];
 
     const style = document.createElement('style');
@@ -290,7 +289,9 @@
         root.appendChild(style);
     }
 
-    // Пересборка сетки товаров на Маркете в авто-режим без дыр
+    // ==========================================
+    // ПЕРЕСБОРКА СЕТКИ ТОВАРОВ НА МАРКЕТЕ
+    // ==========================================
     if (location.hostname.includes('market.')) {
         const marketGridStyle = document.createElement('style');
         marketGridStyle.id = 'ya-market-grid-fix';
@@ -307,5 +308,55 @@
             }
         `;
         (document.head || document.documentElement).appendChild(marketGridStyle);
+    }
+
+    // ==========================================
+    // ЗАМЕНА ПЕРЕВЕДЁННЫХ ТУРБО-СТРАНИЦ В ПОИСКЕ
+    // ==========================================
+    if (location.pathname.startsWith('/search')) {
+        const processed = new WeakSet();
+
+        function processTurboItems() {
+            const items = document.querySelectorAll('li.serp-item.serp-item_card');
+            items.forEach(li => {
+                if (processed.has(li)) return;
+
+                const translatedDiv = li.querySelector('div.TranslatedSnippet');
+                if (!translatedDiv) return;
+
+                const mainLink = translatedDiv.querySelector('div.OrganicTitle a.Link');
+                const footer = translatedDiv.querySelector('div.TranslatedSnippet-Footer');
+                const footerLink = footer?.querySelector('a.Link');
+                const label = translatedDiv.querySelector('p.TranslatedSnippet-Label');
+
+                if (mainLink && footerLink) {
+                    mainLink.href = footerLink.href;
+                    footer.style.display = 'none';
+                    if (label) label.style.display = 'none';
+                    processed.add(li);
+                }
+            });
+        }
+
+        function initTurboObserver() {
+            if (!document.body) return;
+            processTurboItems();
+
+            const observer = new MutationObserver(processTurboItems);
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initTurboObserver);
+        } else {
+            initTurboObserver();
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(processTurboItems, 1500);
+        });
     }
 })();
