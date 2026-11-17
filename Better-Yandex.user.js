@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Better Yandex
 // @namespace    http://tampermonkey.net/
-// @version      1.1.2
+// @version      1.1.3
 // @description  Вырезает промо и рекламу в сервисах Яндекса
 // @author       Hockii x Gemini
 // @match        https://ya.ru/*
@@ -137,6 +137,11 @@
         'div.main__carousel',
         'div[data-bem*="main__carousel"]',
         'div.main__carousel[data-bem*="collectionId"]',
+
+        // РСЯ-блоки с обфусцированной разметкой в Поиске (advRsyaReact / rsya-guarantee)
+        'div[data-reqid]:has([id^="advRsyaReact_"])',
+        'div[data-reqid]:has([id*="rsya-guarantee"])',
+        'div[id^="advRsyaReact_"]',
 
         // ==========================================
         // ЯНДЕКС КАРТИНКИ
